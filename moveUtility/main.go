@@ -3,49 +3,41 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func main() {
+	// accepting arguements
 	args := os.Args
 
-	source := args[1]
-	dest := args[2]
+	// retrive Source and Dest from args
 
-	info, err := os.Stat(source)
+	Source := args[1]
+	Dest := args[2]
 
-	if err != nil {
-		fmt.Println("Invalid path")
+	fmt.Println(Source)
+	fmt.Println(Dest)
+
+	// retrive stats from paths
+	_, err1 := os.Stat(Source)
+	_, err2 := os.Stat(Dest)
+
+	// checking for errors
+	if err1 != nil {
+		fmt.Println("error while reading Source")
 		return
 	}
-	if !(info.IsDir()) { // if the source is just a file then just copy paste
-		CopyUtil(source, dest, "")
-	} else {
-		directory, err := os.ReadDir(source)
-		if err != nil {
-			fmt.Println("some error during reading source directory")
-			return
-		}
-		destDets, err2 := os.Stat(dest)
-		if err2 != nil {
-			fmt.Println("something wrong with dest")
-			return
-		}
-		if !(destDets.IsDir()) { //checking for source to be dir and dest to be file if yes then return
-			fmt.Println("given dest path is a file path, cant move a directory to it")
-			return
-		}
-
-		for _, fileName := range directory {
-			str := fmt.Sprintf("%v/%v", source, fileName.Name())
-			CopyUtil(str, dest, fileName.Name())
-			os.Remove(str) // removing files form source
-		}
-		// fmt.Println("movement successful")
-		err3 := os.Remove(source) // removing files form source
-		if err3 != nil {
-			fmt.Println("problem in file deletion")
-		}
-		fmt.Println("files deleted")
+	if err2 != nil {
+		fmt.Println("error while reading Dest")
+		return
 	}
+
+	// calculating filesize and time 
+	fileSize := 0.0
+	t1 := time.Now()
+	MoveUtil(Source, Dest, &fileSize)
+	elapsed := time.Since(t1)
+
+	fmt.Printf("Total time and total size in MBs => %v %vMbs %vBytes\n", elapsed, float64(fileSize/(1024.0*1024.0)), fileSize)
 
 }
