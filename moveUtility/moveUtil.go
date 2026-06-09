@@ -5,7 +5,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 )
+
+var updateMutex sync.Mutex
 
 func MoveUtil(Source, Dest string, fileSize *float64) {
 	// retrive base address of Source
@@ -14,7 +17,9 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 
 	// check if Source is a file or dir
 	if !SourceStat.IsDir() {
+		updateMutex.Lock()
 		(*fileSize) += float64(SourceStat.Size())
+		updateMutex.Unlock()
 
 		// THE COMMENTED CODE BELOW IS OF WRITING WHOLE FILE AT ONCE
 
@@ -69,7 +74,7 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 			return
 		}
 		fmt.Println("File written")
-		return 
+		return
 	}
 
 	// as now source is a Dir -> reading the sturture of this dir
@@ -85,9 +90,17 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 	}
 
 	// now iterating through all the entry of this dir and recursively calling MoveUtil until every entry reaches to just files
+
+	var wg sync.WaitGroup
+
 	for _, entry := range sourceStructure {
 		new_source := filepath.Join(Source, entry.Name()) // adding each entry's name at the end of source path
-		MoveUtil(new_source, Dest, fileSize)              // recursively calling moveUtil
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			MoveUtil(new_source, Dest, fileSize)
+		}() // recursively calling moveUtil
 	}
+	wg.Wait()
 
 }

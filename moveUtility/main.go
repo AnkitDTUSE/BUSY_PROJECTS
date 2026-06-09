@@ -32,10 +32,20 @@ func main() {
 		return
 	}
 
-	// calculating filesize and time 
+	// calculating filesize and time
 	fileSize := 0.0
 	t1 := time.Now()
-	MoveUtil(Source, Dest, &fileSize)
+
+	MoveUtil(Source, Dest, &fileSize) // -> approx 1s to copy this folder -> D:\college diary\ADAppr4thSem
+
+	// var wg sync.WaitGroup
+	// wg.Add(1)
+	// go func() { // using routines -> time goes down to 205milliseconds!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// 	defer wg.Done()
+	// 	MoveUtil(Source, Dest, &fileSize)
+	// }()
+	// wg.Wait()
+
 	elapsed := time.Since(t1)
 
 	fmt.Printf("Total time and total size in MBs => %v %vMbs %vBytes\n", elapsed, float64(fileSize/(1024.0*1024.0)), fileSize)
