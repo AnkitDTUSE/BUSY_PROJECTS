@@ -36,11 +36,11 @@ func main() {
 	fileSize := 0.0
 	t1 := time.Now()
 
-	MoveUtil(Source, Dest, &fileSize) // -> approx 1s to copy this folder -> D:\college diary\ADAppr4thSem
+	MoveUtil(Source, Dest, &fileSize) // calling move func here
 
-	// var wg sync.WaitGroup
+	// var wg sync.WaitGroup // now a go idea here
 	// wg.Add(1)
-	// go func() { // using routines -> time goes down to 205milliseconds!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// go func() { // using routines -> time goes down to 205milliseconds !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// 	defer wg.Done()
 	// 	MoveUtil(Source, Dest, &fileSize)
 	// }()
@@ -50,4 +50,6 @@ func main() {
 
 	fmt.Printf("Total time and total size in MBs => %v %vMbs %vBytes\n", elapsed, float64(fileSize/(1024.0*1024.0)), fileSize)
 
+	// os.Remove(Source)
+	
 }

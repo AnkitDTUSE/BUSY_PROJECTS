@@ -17,6 +17,8 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 
 	// check if Source is a file or dir
 	if !SourceStat.IsDir() {
+
+		// locking fileSize wo consistent values
 		updateMutex.Lock()
 		(*fileSize) += float64(SourceStat.Size())
 		updateMutex.Unlock()
@@ -48,7 +50,6 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 		// return
 
 		// FROM NOW ON WE WRITE FILE IN CHUNKS OF 2MB
-
 		// opening file at source
 
 		sourceFile, err := os.Open(Source)
