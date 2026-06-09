@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -13,30 +14,62 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 
 	// check if Source is a file or dir
 	if !SourceStat.IsDir() {
-		// as source is a file -> reading its data
-		sourceData, err := os.ReadFile(Source)
-
-		// adding fileSize
 		(*fileSize) += float64(SourceStat.Size())
 
-		if err != nil {
-			fmt.Println("error while reading SourceFile")
-			return
-		}
+		// THE COMMENTED CODE BELOW IS OF WRITING WHOLE FILE AT ONCE
 
-		// adding filename at the end of Dest
+		// // as source is a file -> reading its data
+		// sourceData, err := os.ReadFile(Source)
+
+		// // adding fileSize
+
+		// if err != nil {
+		// 	fmt.Println("error while reading SourceFile")
+		// 	return
+		// }
+
+		// // adding filename at the end of Dest
 		Dest := filepath.Join(Dest, basePath)
 
-		//writing file
-		err2 := os.WriteFile(Dest, sourceData, 0644)
+		// //writing file
+		// err2 := os.WriteFile(Dest, sourceData, 0644)
 
-		if err2 != nil {
-			fmt.Println("error while writing file at Dest")
+		// if err2 != nil {
+		// 	fmt.Println("error while writing file at Dest")
+		// 	return
+		// }
+
+		// fmt.Println("File written")
+		// return
+
+		// FROM NOW ON WE WRITE FILE IN CHUNKS OF 2MB
+
+		// opening file at source
+
+		sourceFile, err := os.Open(Source)
+		if err != nil {
+			fmt.Println("Error while open file at source")
 			return
 		}
+		defer sourceFile.Close() //closing file
 
+		destFile, err := os.Create(Dest)
+		if err != nil {
+			fmt.Println("Error while creating file at Dest")
+			return
+		}
+		defer destFile.Close()
+
+		buffer := make([]byte, 2*1024*1024) // byte is an alias for uint8 (0 - 255)
+
+		_, err2 := io.CopyBuffer(destFile, sourceFile, buffer) // _ is for a varible which copybuffer return as an INT8 which is eq to the size of data written
+
+		if err2 != nil {
+			fmt.Println("Error while writting at dest")
+			return
+		}
 		fmt.Println("File written")
-		return
+		return 
 	}
 
 	// as now source is a Dir -> reading the sturture of this dir
