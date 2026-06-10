@@ -65,8 +65,8 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 			return
 		}
 		defer destFile.Close()
-
-		buffer := make([]byte, 2*1024*1024) // byte is an alias for uint8 (0 - 255)
+		bufSize := 2 * 1024 * 1024
+		buffer := make([]byte, bufSize) // byte is an alias for uint8 (0 - 255)
 
 		_, err2 := io.CopyBuffer(destFile, sourceFile, buffer) // _ is for a varible which copybuffer return as an INT8 which is eq to the size of data written
 

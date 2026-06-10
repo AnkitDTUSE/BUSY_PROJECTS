@@ -50,6 +50,6 @@ func main() {
 
 	fmt.Printf("Total time and total size in MBs => %v %vMbs %vBytes\n", elapsed, float64(fileSize/(1024.0*1024.0)), fileSize)
 
-	// os.Remove(Source)
+	// os.Remove(Source) // uncomment this to complete the move Utility
 	
 }
