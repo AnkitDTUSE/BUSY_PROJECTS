@@ -36,7 +36,7 @@ func MoveUtil(Source, Dest string, fileSize *float64) {
 		// }
 
 		// // adding filename at the end of Dest
-		Dest := filepath.Join(Dest, basePath)
+		Dest := filepath.Join(Dest, basePath) // uncomment this line as it is crucial for both (write whole file at once or write using buffer)
 
 		// //writing file
 		// err2 := os.WriteFile(Dest, sourceData, 0644)
