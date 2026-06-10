@@ -8,11 +8,6 @@ import (
 	"sync"
 )
 
-type CopyJob struct {
-	Source string
-	Dest   string
-}
-
 var (
 	MUTEX sync.Mutex
 )
@@ -35,12 +30,14 @@ func Worker(
 			continue // this continue here is imp, as if I write Return here this will lead to the death of a worker (as returning means this a particular worker is now quit the worker func)
 		}
 
+		// open Sourcefile
 		srcHandle, err2 := os.Open(job.Source)
 		if err2 != nil {
 			fmt.Println(err)
 			continue
 		}
 
+		// create file at dest
 		dstHandle, err3 := os.Create(job.Dest)
 		if err3 != nil {
 			srcHandle.Close() // if Dest is Faulty then close source File
@@ -48,6 +45,7 @@ func Worker(
 			continue
 		}
 
+		// copy data using buffer
 		_, err4 := io.CopyBuffer(dstHandle, srcHandle, buffer)
 
 		srcHandle.Close()
@@ -83,6 +81,9 @@ func MoveUtil(source, dest string, jobs chan<- CopyJob) {
 
 	if !sourceStat.IsDir() {
 
+		// previously here, we are opening creating and writing files as the basecase
+		// but now we are creating jobs insteads
+
 		jobs <- CopyJob{
 			Source: source,
 			Dest:   filepath.Join(dest, basePath),
@@ -92,7 +93,7 @@ func MoveUtil(source, dest string, jobs chan<- CopyJob) {
 		return
 	}
 
-	sourceStructure,_ := os.ReadDir(source)
+	sourceStructure, _ := os.ReadDir(source)
 
 	newDest := filepath.Join(dest, basePath)
 	err = os.Mkdir(newDest, 0755)
@@ -110,21 +111,6 @@ func MoveUtil(source, dest string, jobs chan<- CopyJob) {
 		)
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // package main
 

@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+type CopyJob struct {
+	Source string
+	Dest   string
+}
+
 var (
 	wg sync.WaitGroup
 )
@@ -61,7 +66,7 @@ func main() {
 	workers := 15
 
 	t1 := time.Now()
-	
+
 	for i := 0; i < workers; i++ { // Initializing each worker
 		wg.Add(1)
 
@@ -79,11 +84,11 @@ func main() {
 
 	wg.Wait()
 
-	t2 := time.Since(t1)
+	elapsed := time.Since(t1)
 
 	fmt.Printf(
 		"\nTotal time and total size in MBs => %v %vMB %vBytes\n",
-		t2,
+		elapsed,
 		float64(fileSize)/(1024*1024),
 		fileSize,
 	)
@@ -98,22 +103,6 @@ func main() {
 // 1MB 		25.752762s 		1945.4457368850708MB 2039947709Bytes -> 	74 MB/s
 
 // 5MB  	5.8288255s 		1410.5730619430542MB 1479093059Bytes -> 	235MB/s
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // package main
 
