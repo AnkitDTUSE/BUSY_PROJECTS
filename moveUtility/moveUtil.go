@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	MUTEX sync.Mutex
+	MUTEX sync.Mutex //MUTEX variable to intiate lock unlock mech for shared resources among Routines to prevent any inconsistency with the shared Resource
 )
 
 func Worker(
@@ -20,9 +20,9 @@ func Worker(
 ) {
 	defer wg.Done()
 
-	buffer := make([]byte, bufSize*1024)
+	buffer := make([]byte, bufSize*1024) // declare a buffer of size bufSize
 
-	for job := range jobs {
+	for job := range jobs { // assinging jobs to the workers in this loop (this loop blocks the workers from working until there is a JOB in the job channel)
 
 		jobStat, err := os.Stat(job.Source)
 		if err != nil {
@@ -48,53 +48,52 @@ func Worker(
 		// copy data using buffer
 		_, err4 := io.CopyBuffer(dstHandle, srcHandle, buffer)
 
-		srcHandle.Close()
-		dstHandle.Close()
+		defer srcHandle.Close()
+		defer dstHandle.Close()
 
 		if err4 != nil {
 			fmt.Println(err)
 			continue
 		}
 
+		
+		MUTEX.Lock()
+		(*fileSize) += int(jobStat.Size()) // add fileSize
+		MUTEX.Unlock()
+		
+		// uncomment the code below to delete the source after the movement of file is done
+		
 		// err5 = os.Remove(job.Source)
 		// if err5 != nil {
 		// 	fmt.Println("failed to delete:", job.Source)
 		// }
-
-		MUTEX.Lock()
-		(*fileSize) += int(jobStat.Size())
-		MUTEX.Unlock()
-
 	}
 }
 
 func MoveUtil(source, dest string, jobs chan<- CopyJob) {
 
-	sourceStat, err := os.Stat(source)
+	sourceStat, err := os.Stat(source) // retrive Info about Source
 	if err != nil {
 		return
 	}
 
-	basePath := filepath.Base(source)
+	basePath := filepath.Base(source) // retrive the basePath of source , so that we can create a named file at the dest
 
-	// this is the all task we need to do in MoveUtil , create a new job every time we hit a file
+	if !sourceStat.IsDir() { // this is the base case of the recurrsive call of MoveUtil func
 
-	if !sourceStat.IsDir() {
-
-		// previously here, we are opening creating and writing files as the basecase
-		// but now we are creating jobs insteads
-
+		// if the Source is a file then create a JOB and push it in the job channel
 		jobs <- CopyJob{
 			Source: source,
 			Dest:   filepath.Join(dest, basePath),
 		}
-
-		fmt.Println("File written")
 		return
 	}
 
+	// if source is a Dir then read its structure
+
 	sourceStructure, _ := os.ReadDir(source)
 
+	// make a named Dir at dest
 	newDest := filepath.Join(dest, basePath)
 	err = os.Mkdir(newDest, 0755)
 	if err != nil {
@@ -102,6 +101,7 @@ func MoveUtil(source, dest string, jobs chan<- CopyJob) {
 		return
 	}
 
+	// loop over all the entries in the Source and recursively call MoveUtil for each entry of source
 	for _, entry := range sourceStructure {
 
 		MoveUtil(
@@ -111,111 +111,3 @@ func MoveUtil(source, dest string, jobs chan<- CopyJob) {
 		)
 	}
 }
-
-// package main
-
-// import (
-// 	"fmt"
-// 	"io"
-// 	"os"
-// 	"path/filepath"
-// 	"sync"
-// )
-
-// var (
-// 	updateMutex sync.Mutex
-// )
-
-// func MoveUtil(Source, Dest string, fileSize *float64, bufSize *int) {
-// 	// retrive base address of Source
-// 	basePath := filepath.Base(Source)
-// 	SourceStat, _ := os.Stat(Source)
-
-// 	// check if Source is a file or dir
-// 	if !SourceStat.IsDir() {
-
-// 		// locking fileSize wo consistent values
-// 		updateMutex.Lock()
-// 		(*fileSize) += float64(SourceStat.Size())
-// 		updateMutex.Unlock()
-
-// 		// THE COMMENTED CODE BELOW IS OF WRITING WHOLE FILE AT ONCE
-
-// 		// // as source is a file -> reading its data
-// 		// sourceData, err := os.ReadFile(Source)
-
-// 		// // adding fileSize
-
-// 		// if err != nil {
-// 		// 	fmt.Println("error while reading SourceFile")
-// 		// 	return
-// 		// }
-
-// 		// // adding filename at the end of Dest
-// 		Dest := filepath.Join(Dest, basePath) // uncomment this line as it is crucial for both (write whole file at once or write using buffer)
-
-// 		// //writing file
-// 		// err2 := os.WriteFile(Dest, sourceData, 0644)
-
-// 		// if err2 != nil {
-// 		// 	fmt.Println("error while writing file at Dest")
-// 		// 	return
-// 		// }
-
-// 		// fmt.Println("File written")
-// 		// return
-
-// 		// FROM NOW ON WE WRITE FILE IN CHUNKS OF 2MB
-// 		// opening file at source
-
-// 		sourceFile, err := os.Open(Source)
-// 		if err != nil {
-// 			fmt.Println("Error while open file at source")
-// 			return
-// 		}
-// 		defer sourceFile.Close() //closing file
-
-// 		destFile, err := os.Create(Dest)
-// 		if err != nil {
-// 			fmt.Println("Error while creating file at Dest")
-// 			return
-// 		}
-// 		defer destFile.Close()
-// 		buffer := make([]byte, (*bufSize)*1024) // byte is an alias for uint8 (0 - 255)
-
-// 		_, err2 := io.CopyBuffer(destFile, sourceFile, buffer) // _ is for a varible which copybuffer return as an INT8 which is eq to the size of data written
-
-// 		if err2 != nil {
-// 			fmt.Println("Error while writting at dest")
-// 			return
-// 		}
-// 		return
-// 	}
-
-// 	// as now source is a Dir -> reading the sturture of this dir
-// 	sourceStructure, _ := os.ReadDir(Source)
-
-// 	// making required Dir at Dest
-// 	Dest = filepath.Join(Dest, basePath)
-// 	err := os.Mkdir(Dest, 0755)
-
-// 	if err != nil {
-// 		fmt.Println("error while making new dir at dest")
-// 		return
-// 	}
-
-// 	// now iterating through all the entry of this dir and recursively calling MoveUtil until every entry reaches to just files
-
-// 	var wg sync.WaitGroup
-
-// 	for _, entry := range sourceStructure {
-// 		new_source := filepath.Join(Source, entry.Name()) // adding each entry's name at the end of source path
-// 		wg.Add(1)
-// 		go func() {
-// 			defer wg.Done()
-// 			MoveUtil(new_source, Dest, fileSize, bufSize)
-// 		}() // recursively calling moveUtil
-// 	}
-// 	wg.Wait()
-
-// }
