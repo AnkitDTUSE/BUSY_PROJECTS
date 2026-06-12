@@ -1,0 +1,38 @@
+Cache type Utility
+
+prerequiste -> Make a CSV file for persistent mode of utitlity
+
+-> main()
+    1. make 2 empty interfaces for KEY and VALUE (this allows flexibility to add any type of data)
+    2. inside main declare a MAP of MAP[KEY]VALUE type
+    3. Call getSet()
+    4. Open Data.csv file
+    5. check size of data.csv
+        IF : File is not empty
+            data file has some rows of key,value
+            1. open the file in ReadWrite mode
+            2. as for P and C (persistent mode clear mode)
+            IF: P 
+                1. loop over each row of file
+                2. add key value pair in map
+            ElseIf: C
+                1. truncate data file
+    Now ask for SET OR GET functionalities as there is nothing to read from the file
+    6. declare a reader readArgs
+    7. start a while(true) loop
+    8. scan input using readArgs.Scan()
+    9. if empty then break the loop
+    10. else retrive FUNCTIONALITY KEY VALUE from its using strings.Feild(readArgs.Text())
+    11. check for lenght of args IF its zero then run Continue to re start loop
+    12. else use Switch args[0]
+        Case "SET":
+        1. save key value in map
+        2. open data file in append mode 
+        3. save the row of new key,value in file
+        4. close file
+        Case "GET":
+        1. retrive mpp[key] 
+        2. if exists then show else Continue
+        Case "EXIT"
+        break the loop
+    

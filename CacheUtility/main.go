@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
+
+type KEY any
+type VALUE any
 
 func main() {
-	fmt.Println("Hello")
+
+	fmt.Println("Cache util")
+	DataStorage := make(map[KEY]VALUE)
+	cacheUtil(&DataStorage)
 }
