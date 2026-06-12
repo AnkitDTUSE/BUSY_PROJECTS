@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
+)
+
+var (
+	mutex sync.RWMutex
 )
 
 // preRequiste is to make a CSV file to hold the data of map after the program got terminated
@@ -82,11 +87,11 @@ func cacheUtil(mpp *map[KEY]VALUE) {
 
 	defer dbReopen.Close()
 
-	fmt.Println("\nUse this format to GET or SET data in cache: SET <KEY> <VALUE> or GET <KEY>   EXIT to exit the cache")
+	fmt.Println("\nUse this format to GET or SET data in cache: SET <KEY> <VALUE> or GET <KEY>  EXIT to exit the cache")
 
 	for {
 		fmt.Print("\n->")
-		 
+
 		// scan for input , if null then break loop
 		if !Scanner.Scan() {
 			break
@@ -112,7 +117,12 @@ func cacheUtil(mpp *map[KEY]VALUE) {
 
 			recordWriter := csv.NewWriter(dbReopen) // create a writer to write new record in File
 			newRow := []string{args[1], args[2]}
-			if err := recordWriter.Write(newRow); err != nil {
+
+			mutex.Lock()
+			err := recordWriter.Write(newRow)
+			mutex.Unlock()
+
+			if err != nil {
 				fmt.Println("error while writing")
 				return
 			}
