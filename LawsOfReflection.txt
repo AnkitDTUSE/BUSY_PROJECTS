@@ -1,0 +1,52 @@
+-> What is Metaprogramming?
+
+    Metaprogramming is a programming technique where a computer program treats other programs—or even itself—as its data (to process on).
+    It means writing code that generates, analyzes, or manipulates other code.
+    In standard programming, code processes data (like strings, integers, or database records).
+    In metaprogramming, code processes code (like variables, functions, classes, or types).
+
+    There are two main types of metaprogramming:
+
+    1. Compile-time Metaprogramming: Code that runs before the application fully builds to generate or alter the final binary.
+    Examples include macros in C/C++, decorators in TypeScript, or templates in C++.
+    
+    2. Run-time Metaprogramming: Code that manipulates the application while it is actively running. 
+    This is where reflection comes into play.
+
+-> What is Reflection?
+    Reflection is a specific subset of run-time metaprogramming. It is the ability of a program to examine, introspect, and modify
+    its own structure and behavior at runtime.
+    In a typical compiled language, once your code is built,
+    the names of your variables, functions, and structs ARE STRIPPED AWAY and turned into RAW MEMORY ADDRESS. 
+    A standard program doesn't "KNOW" what it looks like.
+
+    However, A language that supports reflection preserves this metadata. This allows a running program to ask itself questions like:
+    
+        "What properties or methods does this unknown object have?"
+        "What is the exact data type of this variable?"
+        "Does this class implement a specific interface?"
+
+    Beyond just inspecting itself (introspection), reflection often allows a program to actively manipulate itself, such as:
+
+        Instantiating an object of a class whose name is only known as a string at runtime.
+        Invoking a method by dynamically looking up its text name.
+        Modifying private or unexported variables that are normally inaccessible.
+        Real-World Use Case: JSON Serialization
+        When you use a library to convert a database object into a JSON string (or vice versa),
+        the library uses reflection. The person who wrote the JSON library didn't know what custom structs or classes 
+        you would create in the future. Instead, the library uses reflection at runtime to look inside your custom object,
+        dynamically read its field names (like UserID, Email), and automatically map them into a JSON format.
+
+-> Why is it called "Reflection"?
+    The term is a direct physical analogy to a mirror.
+    In the physical world, you cannot look directly at your own face without an external tool. 
+    To see your own features, structure, and movement, you must look into a mirror and see your reflection. 
+    The mirror allows you to observe yourself and make adjustments (like fixing your hair).
+
+    In computer programming, code is usually focused outward—processing user input, calculations, or network requests.
+    When code uses reflection, it is metaphorically "holding up a mirror" to itself.
+
+    The "reflection" it sees in that mirror is its own source code structure, types, and properties.
+
+    Just like a person adjusting their appearance based on what they see in a mirror, 
+    a program can use reflection to adjust its execution behavior based on its own internal state.
