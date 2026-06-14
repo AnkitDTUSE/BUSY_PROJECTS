@@ -34,7 +34,7 @@ func cacheUtil(mpp *map[KEY]VALUE) {
 	// checking File size
 	if dbInfo.Size() != 0 {
 		// filesize is non zero
-		
+
 		// create a CSV reader on file
 		csvReader := csv.NewReader(db)
 		fmt.Println("\nHIT 'P' to enter persistent mode or 'C' to clear cache")
@@ -113,12 +113,11 @@ func cacheUtil(mpp *map[KEY]VALUE) {
 				fmt.Println("format to set value is SET <KEY> <VALUE>")
 				continue
 			}
-			(*mpp)[args[1]] = args[2]
-
 			recordWriter := csv.NewWriter(dbReopen) // create a writer to write new record in File
 			newRow := []string{args[1], args[2]}
 
 			mutex.Lock()
+			(*mpp)[args[1]] = args[2]
 			err := recordWriter.Write(newRow)
 			mutex.Unlock()
 
@@ -130,7 +129,9 @@ func cacheUtil(mpp *map[KEY]VALUE) {
 			fmt.Println("Value Setted")
 
 		case "GET":
+			mutex.RLock()
 			val, ok := (*mpp)[args[1]]
+			mutex.RUnlock()
 			if !ok {
 				fmt.Println("Key dont exists :( ")
 				continue
